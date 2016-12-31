@@ -1,0 +1,30 @@
+{
+  "name": "paperflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "connect-flash": "^0.1.1",
+    "crypto": "0.0.3",
+    "emailjs": "^1.0.8",
+    "express": "^4.14.0",
+    "express-session": "^1.14.2",
+    "geoip-lite": "^1.1.8",
+    "hashids": "~1.1.1",
+    "http": "0.0.0",
+    "json-parser": "^1.1.5",
+    "jsonwebtoken": "^7.2.1",
+    "macaddress": "^0.2.8",
+    "mongoose": "^4.7.2",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "urlencode": "^1.1.0"
+  }
+}
