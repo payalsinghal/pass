@@ -9,4 +9,9 @@ var loginSchema = mongoose.Schema({
     pid                    :       { type: String},
     lastLogin               :       []
       });
+
+// loginSchema.methods.validPassword = function(password) {
+// 	if
+//     return compareSync(password, this.password);
+// };
 	module.exports = mongoose.model('login', loginSchema);
