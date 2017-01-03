@@ -11,14 +11,13 @@ var morgan  = require('morgan')
 mongoose.connect('mongodb://localhost/pbm');
 
 app.use(morgan('dev')); 
-
 app.use(passport.initialize());
-
 app.use(flash());
-var routes = require('./Routes/routes');
-
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({extended:true})); 
+
+var routes = require('./Routes/routes');
+
 app.use('/api', routes)
 
 app.listen(PORT,function(err){

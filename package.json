@@ -23,6 +23,7 @@
     "jsonwebtoken": "^7.2.1",
     "macaddress": "^0.2.8",
     "mongoose": "^4.7.2",
+    "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "urlencode": "^1.1.0"
