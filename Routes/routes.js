@@ -16,6 +16,7 @@ var urlencode = require('urlencode');
 // var sha512 = require('js-sha512');
 var Hashids = require('hashids')
 var hashSalt = new Hashids('Pbm forget password');
+//var flash    = require('connect-flash');
 
 router.route('/register')
     .post(function(req, res) {
@@ -259,34 +260,35 @@ passport.use(new LocalStrategy({
     Login.findOne({ 'email' :  req.body.email  }, function(err, user) {
       if (err) { return done(err); }
       if (!user) {
-        return done(null, false, req.flash( 'Incorrect username.' ));
+        return done(null, false, ( 'Incorrect username.' ));
       }
       if (password!=req.body.password) {
-        return done(null, false, req.flash( 'Incorrect password.')  );
+        return done(null, false, ( 'Incorrect password.')  );
       }
       return done(null, user);
     });
   }
 ));
 
-app.post('/login',passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/',
-                                   failureFlash: true,session:false}),     
-function(req, res) {
-    res.redirect('/');
-    }
-);
+// app.post('/login',passport.authenticate('local', { successRedirect: '/',
+//                                    failureRedirect: '/',
+//                                    failureFlash: true,session:false}),     
+// function(req, res) {
+//     res.redirect('/');
+//     }
+// );
 
 
-app.post('/login', function(req, res, next) {
+router.post('/login', function(req, res, next) {
   passport.authenticate('local',{ session: false }, function(err, user, info) {
     if (err) { return next(err) }
     if (!user) {
-      return res.json(401, { error: 'message' });
+      return res.json(401, { error: 'message1' });
     }
-
+//tokenSecret=23;
     //user has authenticated correctly thus we create a JWT token 
-    var token = jwt.encode({ username: 'somedata'}, tokenSecret);
+    //var token = jwt.encode({ username: 'somedata'}, tokenSecret);
+    var token = jwt.sign(456546, 'superSecret');
     res.json({ token : token });
 
   })(req, res, next);
