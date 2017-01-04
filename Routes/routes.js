@@ -240,15 +240,7 @@ router.route('/verify')
 //         })
 //     })
 
-// passport.serializeUser(function(user, done) {
-//   done(null, user.id);
-// });
-
-// passport.deserializeUser(function(id, done) {
-//   User.findById(id, function(err, user) {
-//     done(err, user);
-//   });
-// });  
+ 
 
 
 passport.use(new LocalStrategy({
@@ -258,11 +250,16 @@ passport.use(new LocalStrategy({
 
   function(req,email, password, done) {
     Login.findOne({ 'email' :  req.body.email  }, function(err, user) {
-      if (err) { return done(err); }
+      if (err) { 
+          console.log("e2")
+        return done(err); }
       if (!user) {
-        return done(null, false, ( 'Incorrect username.' ));
+          console.log("e3")
+        return done(null, false, ( 'Incorrect email.' ));
+
       }
       if (password!=req.body.password) {
+          console.log("e4")
         return done(null, false, ( 'Incorrect password.')  );
       }
       return done(null, user);
@@ -270,43 +267,78 @@ passport.use(new LocalStrategy({
   }
 ));
 
-// app.post('/login',passport.authenticate('local', { successRedirect: '/',
-//                                    failureRedirect: '/',
-//                                    failureFlash: true,session:false}),     
-// function(req, res) {
-//     res.redirect('/');
-//     }
-// );
+
 
 
 router.post('/login', function(req, res, next) {
   passport.authenticate('local',{ session: false }, function(err, user, info) {
+
     if (err) { return next(err) }
     if (!user) {
-      return res.json(401, { error: 'message1' });
+      
+      return res.status(401).json({error: 'message1'})
+      console.log("e1")
     }
-//tokenSecret=23;
-    //user has authenticated correctly thus we create a JWT token 
-    //var token = jwt.encode({ username: 'somedata'}, tokenSecret);
-    var token = jwt.sign(456546, 'superSecret');
-    res.json({ token : token });
+
+
+    Login.findOne({ email: req.body.email }, function(error, data) {
+     if (data && data.active == true) {
+
+                    if (data.password == req.body.password) {
+
+                        var ip = req.ip.split(":");
+                        var clientmac;
+                        ipClient = ip[3];
+                        
+                        macaddress.one(function(err, mac) {
+                        clientmac=mac
+                        })
+
+                        obj = { date: new Date(), ip: ipClient, mac:clientmac };
+                        data.lastLogin.push(obj);
+                        data.save();
+
+                        ContactRegister.update({ email: req.body.email }, { $push: { lastLogin:obj } }).exec()
+                         data.markModified('lastLogin');
+                         data.save(function(numAffected) {});
+
+                        stoken = {
+                            pfid: data.pfid,
+                            email: data.email,
+                            active: data.active
+                        }
+
+                        var token = jwt.sign(stoken, 'superSecret', { expiresIn: '1d' });
+
+                        Login.update({ email: req.body.email }, { $set: { token: token } }, function(err, loginuser) {
+                            if (err) {
+                                res.json({ success: false });
+                                res.end();
+                            } else {
+
+                                res.set({
+                                    'token': token
+                                });
+
+                                res.json({ success: true });
+                                res.end();
+                            }
+                        })
+                    } else {
+                        res.json({ success: false, message: "wrong password" });
+                        res.end();
+                    }
+                } else {
+                    res.json({ success: false, message: "User not found" });
+                    res.end();
+                }
+            })
 
   })(req, res, next);
 });
 
 
 
-
-
-// function isLoggedIn(req, res, next) {
-
-//     // if user is authenticated in the session, carry on 
-//     if (req.isAuthenticated())
-//         return next();
-
-//     // if they aren't redirect them to the home page
-//     res.redirect('/');
-// }
 
 
 
