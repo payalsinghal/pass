@@ -258,7 +258,7 @@ passport.use(new LocalStrategy({
         return done(null, false, ( 'Incorrect email.' ));
 
       }
-      if (password!=req.body.password) {
+      if (user.password!=req.body.password) {
           console.log("e4")
         return done(null, false, ( 'Incorrect password.')  );
       }
@@ -284,7 +284,7 @@ router.post('/login', function(req, res, next) {
     Login.findOne({ email: req.body.email }, function(error, data) {
      if (data && data.active == true) {
 
-                    if (data.password == req.body.password) {
+                    //if (data.password == req.body.password) {
 
                         var ip = req.ip.split(":");
                         var clientmac;
@@ -324,12 +324,12 @@ router.post('/login', function(req, res, next) {
                                 res.end();
                             }
                         })
-                    } else {
-                        res.json({ success: false, message: "wrong password" });
-                        res.end();
-                    }
+                    // } else {
+                    //     res.json({ success: false, message: "wrong password" });
+                    //     res.end();
+                    // }
                 } else {
-                    res.json({ success: false, message: "User not found" });
+                    res.json({ success: false, message: "Data is not active" });
                     res.end();
                 }
             })
@@ -339,6 +339,63 @@ router.post('/login', function(req, res, next) {
 
 
 
+passport.use('ap',new LocalStrategy({
+        usernameField: 'email',
+            passwordField: 'token',
+            passReqToCallback: true,session:false},
+
+  function(req,email, password, done) {
+    Login.findOne({ 'email' :  req.body.email  }, function(err, user) {
+      if (err) { 
+          console.log("e2")
+        return done(err); }
+      if (!user) {
+          console.log("e3")
+        return done(null, false, ( 'Incorrect email.' ));
+
+      }
+      if (user.token!=req.headers.token) {
+          console.log("e4")
+        return done(null, false, ( 'Incorrect password.')  );
+      }
+      return done(null, user);
+    });
+  }
+));
+
+
+
+router.post('/contat_person', function(req, res, next) {
+  passport.authenticate('ap',{ session: false }, function(err, user, info) {
+
+    if (err) { return next(err) }
+    if (!user) {
+      
+      return res.status(401).json({error: 'message1'})
+      console.log("e1")
+    }
+
+ContactRegister.findOne({ email: req.body.email }, function(err, d) {
+                                if (!err) {
+                                    
+                                    d.name = req.body.name;
+                                    d.dob = req.body.dob;
+                                   d.contact_no =req.body.contact_no;
+                                    d.permanent_address.address1 =req.body.permanent_address1
+                                    d.permanent_address.address2 =req.body.permanent_address2
+                                    
+                                    d.save(function(err) {
+                                        if (err)
+                                            res.send(err);
+
+                                        else
+                                            res.send({ message: 'log' })
+                                    });
+                                }
+                            });
+
+  })(req, res, next);
+});
 
 
 
@@ -374,39 +431,43 @@ router.route('/forgotPassword')
 
 
 
-router.route('/contact_person')
-                .post(function(req, res) {
 
-        Login.findOne({ token: req.headers.token }, function(err, user) {
-                        if (err) {
-                            console.log(err);
-                            res.send(err);
-                        } else if (user === null || undefined || "") {
-                            res.json("unauthroized");
-                        } else {
 
-                            ContactRegister.findOne({ email: req.body.email }, function(err, d) {
-                                if (!err) {
-                                    var contact = new ContactRegister();
-                                    contact.name = req.body.name;
-                                    contact.dob = req.body.dob;
-                                    contact.contact_no =req.body.contact_no;
-                                    contact.permanent_address.address1 =req.body.permanent_address1
-                                    contact.permanent_address.address2 =req.body.permanent_address2
+
+
+// router.route('/contact_person')
+//                 .post(function(req, res) {
+
+//         Login.findOne({ token: req.headers.token }, function(err, user) {
+//                         if (err) {
+//                             console.log(err);
+//                             res.send(err);
+//                         } else if (user === null || undefined || "") {
+//                             res.json("unauthroized");
+//                         } else {
+
+//                             ContactRegister.findOne({ email: req.body.email }, function(err, d) {
+//                                 if (!err) {
+//                                     var contact = new ContactRegister();
+//                                     contact.name = req.body.name;
+//                                     contact.dob = req.body.dob;
+//                                     contact.contact_no =req.body.contact_no;
+//                                     contact.permanent_address.address1 =req.body.permanent_address1
+//                                     contact.permanent_address.address2 =req.body.permanent_address2
                                     
-                                    contact.save(function(err) {
-                                        if (err)
-                                            res.send(err);
+//                                     contact.save(function(err) {
+//                                         if (err)
+//                                             res.send(err);
 
-                                        else
-                                            res.send({ message: 'log' })
-                                    });
-                                }
-                            });
-                        }
-                    });
+//                                         else
+//                                             res.send({ message: 'log' })
+//                                     });
+//                                 }
+//                             });
+//                         }
+//                     });
 
-                });
+//                 });
 
 
 
